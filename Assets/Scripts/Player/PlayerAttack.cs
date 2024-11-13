@@ -2,19 +2,19 @@ using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
-    public Animator animator;               // Referência ao Animator
-    public GameObject swordCollider;        // Referência ao objeto SwordCollider
-    public bool isAttacking = false;        // Controle do estado de ataque
+    public float attackRange = 1f; // Distância do ataque
+    public LayerMask enemyLayer;   // Camada dos inimigos
 
-    private void Start()
+    private Animator animator;
+    private bool isAttacking = false;
+
+    private void Awake()
     {
-        // Certifique-se de que o collider da espada comece desativado
-        swordCollider.GetComponent<Collider2D>().enabled = false;
+        animator = GetComponent<Animator>();
     }
 
     private void Update()
     {
-        // Verifica se a tecla de ataque foi pressionada
         if (Input.GetKeyDown(KeyCode.Space))
         {
             Attack();
@@ -26,22 +26,28 @@ public class PlayerAttack : MonoBehaviour
         // Inicia a animação de ataque
         animator.SetTrigger("playerAttack");
 
-        // Marca o jogador como atacando
-        isAttacking = true;
+        // Detecta inimigos dentro do alcance de ataque e aplica dano
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(transform.position, attackRange, enemyLayer);
 
-        // Ativa o collider da espada para o ataque
-        swordCollider.GetComponent<Collider2D>().enabled = true;
+        foreach (Collider2D enemy in hitEnemies)
+        {
+            // Aplica dano ao inimigo se a animação de ataque estiver acontecendo
+            if (animator.GetCurrentAnimatorStateInfo(0).IsName("playerAttack"))
+            {
+                enemy.GetComponent<EnemyHealth>()?.TakeDamage(1);
+            }
+        }
 
-        // Desativa o collider da espada após a duração do ataque
-        Invoke("ResetAttack", 0.5f); // Ajuste o tempo conforme a duração da animação de ataque
+        // Reinicia o estado de ataque após a animação
+        Invoke("ResetAttack", 0.5f); // Ajuste conforme a duração da animação
+    }
+    public bool IsAttacking()
+    {
+        return isAttacking;
     }
 
     private void ResetAttack()
     {
-        // Quando a animação terminar, o jogador não está mais atacando
         isAttacking = false;
-
-        // Desativa o collider da espada após o ataque
-        swordCollider.GetComponent<Collider2D>().enabled = false;
     }
 }

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: -2387370465233836198}
   - component: {fileID: 4556543886311857064}
   - component: {fileID: 1025801798673802840}
+  - component: {fileID: -8165747098564403027}
   m_Layer: 0
   m_Name: TrashBin
   m_TagString: Untagged
@@ -74,7 +75,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: 9907e14c70b1fa24ea84e1673f5eb0b9, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -158,3 +159,17 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.14, y: 0.16065447}
   m_EdgeRadius: 0
+--- !u!114 &-8165747098564403027
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2419127372925641891}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19423b8255dfe764e9056af6ad28866f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  acceptedTrashType: {fileID: 11400000, guid: e0b4a80a6f905834d8027b33239f1845, type: 2}
+  scoreManager: {fileID: 0}

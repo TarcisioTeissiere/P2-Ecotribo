@@ -3,7 +3,7 @@ using UnityEngine;
 public class EnemyAnimation : MonoBehaviour
 {
     private Animator animator;
-    private EnemyHealth enemyHealth; 
+    public EnemyHealth enemyHealth; 
     private EnemyMovement enemyMovement; 
 
     private void Awake()
@@ -19,7 +19,7 @@ public class EnemyAnimation : MonoBehaviour
         if (enemyHealth.currentHealth <= 0)
         {
             animator.SetBool("isDead", true);
-            return;
+            return; // Se estiver morto, não deve mais fazer nada além de animação de morte
         }
 
         // Verifica se o inimigo está andando
@@ -27,6 +27,7 @@ public class EnemyAnimation : MonoBehaviour
         animator.SetBool("isWalking", isWalking);
     }
 
+    // Função para ativar a animação de ataque
     public void TriggerAttack()
     {
         animator.SetTrigger("isAttacking");

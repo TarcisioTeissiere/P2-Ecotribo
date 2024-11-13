@@ -1,22 +1,23 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class PlayerHealth : MonoBehaviour
 {
     public int maxHealth = 3;             // Vida máxima do jogador
     private int currentHealth;            // Vida atual do jogador
     private Animator animator;            // Referência ao Animator
+    private PlayerAttack playerAttack;    // Referência ao script de ataque do jogador
 
     public Image[] hearts;                // Array para armazenar as imagens de coração
 
     private void Start()
     {
-        // Define a vida inicial como a vida máxima
         currentHealth = maxHealth;
-        animator = GetComponent<Animator>(); // Inicializa o Animator
-
-        UpdateHearts(); // Atualiza as imagens de coração inicialmente
+        animator = GetComponent<Animator>();
+        playerAttack = GetComponent<PlayerAttack>();
+        UpdateHearts();
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -40,7 +41,7 @@ public class PlayerHealth : MonoBehaviour
 
         if (currentHealth <= 0)
         {
-            Die();
+            StartCoroutine(Die());
         }
     }
 
@@ -48,15 +49,20 @@ public class PlayerHealth : MonoBehaviour
     {
         for (int i = 0; i < hearts.Length; i++)
         {
-            hearts[i].enabled = (i < currentHealth); // Mostra ou esconde os corações com base na vida atual
+            hearts[i].enabled = (i < currentHealth);
         }
     }
 
-    private void Die()
+    private IEnumerator Die()
     {
         Debug.Log("Jogador morreu!");
         animator.SetTrigger("playerDeath");
-        Destroy(gameObject, 0.5f);
+        float deathAnimationTime = animator.GetCurrentAnimatorStateInfo(0).length;
+        float extraTime = 0.5f; // Tempo extra que você deseja adicionar (em segundos)
+
+        // Espera o tempo da animação de morte + o tempo extra
+        yield return new WaitForSeconds(deathAnimationTime + extraTime);
+
         SceneManager.LoadScene("Menu");
     }
 }

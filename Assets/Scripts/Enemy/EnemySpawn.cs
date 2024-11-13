@@ -15,8 +15,6 @@ public class EnemySpawn : MonoBehaviour
         spawnTimer = spawnInterval; // Inicializa o timer de spawn 
 
     }
-
-/*
    private void Update()
 {
     if (playerInventory != null && !playerInventory.IsInventoryFull())
@@ -32,6 +30,4 @@ public class EnemySpawn : MonoBehaviour
         }
     }
 }
-*/
-
 }

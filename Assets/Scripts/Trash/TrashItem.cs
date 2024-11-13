@@ -1,4 +1,3 @@
-// TrashItem.cs
 using UnityEngine;
 
 public class TrashItem : MonoBehaviour

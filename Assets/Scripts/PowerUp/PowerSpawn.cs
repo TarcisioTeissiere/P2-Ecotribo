@@ -1,18 +1,23 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
 
 public class PowerSpawn : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public GameObject powerUpPrefab;
+    public Transform spawnPoint;
+    public float spawnInterval = 20f;
+
+    private void Start()
     {
-        
+        StartCoroutine(SpawnPowerUp());
     }
 
-    // Update is called once per frame
-    void Update()
+    private IEnumerator SpawnPowerUp()
     {
-        
+        while (true)
+        {
+            Instantiate(powerUpPrefab, spawnPoint.position, Quaternion.identity);
+            yield return new WaitForSeconds(spawnInterval);
+        }
     }
 }

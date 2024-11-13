@@ -1,15 +1,18 @@
 using UnityEngine;
+using System.Collections;
 
 public class EnemyHealth : MonoBehaviour
 {
-    public int currentHealth = 1;  // O inimigo tem apenas uma vida
+    public int currentHealth = 1;             // Vida inicial do inimigo
     private Animator animator;
-    public GameObject[] trashItemPrefabs;  // Array para os diferentes tipos de lixo
-    private float dropChance = 0.8f; // Chance de gerar o lixo
+    public GameObject[] trashItemPrefabs;      // Prefabs para o lixo que o inimigo deixa
+    private float dropChance = 0.8f;           // Chance de gerar o lixo
+    private PlayerHealth playerHealth;
 
     private void Start()
     {
         animator = GetComponent<Animator>();
+        playerHealth = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerHealth>();
     }
 
     public void TakeDamage(int damage)
@@ -19,43 +22,73 @@ public class EnemyHealth : MonoBehaviour
             currentHealth -= damage;
             Debug.Log("Inimigo tomou dano. Vida atual: " + currentHealth);
 
+            StartCoroutine(PlayHitAnimation());
+
             if (currentHealth <= 0)
             {
-                Die();
+                StartCoroutine(Die());
             }
         }
     }
 
-    private void Die()
+    private IEnumerator PlayHitAnimation()
     {
-        Debug.Log("Inimigo derrotado!");
-        animator.SetTrigger("isDead");  // Aciona a animação de morte
-
-        // Checa se o lixo deve ser gerado
-        if (Random.value <= dropChance)
-        {
-            // Gera um item de lixo aleatório
-            int randomIndex = Random.Range(0, trashItemPrefabs.Length);
-            Instantiate(trashItemPrefabs[randomIndex], transform.position, Quaternion.identity);
-        }
-
-        Destroy(gameObject, 1f);  // Destroi o inimigo após a animação de morte
+        animator.SetTrigger("slimeHit");
+        float hitAnimationTime = animator.GetCurrentAnimatorStateInfo(0).length;
+        float extraHitTime = 0.3f; // Tempo extra em segundos para a animação de hit
+        yield return new WaitForSeconds(hitAnimationTime + extraHitTime);
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private IEnumerator Die()
     {
-        if (collision.collider.CompareTag("Player"))
+        Debug.Log("Inimigo derrotado!");
+        animator.SetTrigger("isDead");
+
+        if (Random.value <= dropChance)
         {
-            // Verifica se o jogador está atacando antes de aplicar dano
-            PlayerAttack playerAttack = collision.collider.GetComponent<PlayerAttack>();
-            if (playerAttack != null && playerAttack.isAttacking)
+            Debug.Log("Item de drop será instanciado.");
+            int randomIndex = Random.Range(0, trashItemPrefabs.Length);
+            GameObject item = Instantiate(trashItemPrefabs[randomIndex], transform.position, Quaternion.identity);
+
+            if (item != null)
             {
-                TakeDamage(1); // Aplica o dano ao inimigo
+                Debug.Log("Item instanciado com sucesso: " + item.name);
             }
             else
             {
-                Debug.Log("O jogador colidiu, mas não está atacando.");
+                Debug.LogWarning("Falha ao instanciar o item de drop!");
             }
         }
+        else
+        {
+            Debug.Log("Item de drop não foi instanciado desta vez.");
+        }
+
+        float deathAnimationTime = animator.GetCurrentAnimatorStateInfo(0).length;
+        float extraDeathTime = 0.5f;
+        yield return new WaitForSeconds(deathAnimationTime + extraDeathTime);
+
+        Destroy(gameObject);
+    }
+
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.collider.CompareTag("Player"))
+        {
+            Animator playerAnimator = collision.collider.GetComponent<Animator>();
+            bool isPlayerAttacking = playerAnimator != null && playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("playerAttack");
+
+            if (isPlayerAttacking && currentHealth > 0)
+            {
+                TakeDamage(1);
+            }
+            else
+            {
+                // Se o jogador não estiver atacando, o inimigo não toma dano
+                Debug.Log("Inimigo não tomou dano porque o jogador não estava atacando.");
+            }
+        }
+
     }
 }
