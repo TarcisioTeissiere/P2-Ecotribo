@@ -8,11 +8,15 @@ public class EnemyHealth : MonoBehaviour
     public GameObject[] trashItemPrefabs;      // Prefabs para o lixo que o inimigo deixa
     private float dropChance = 0.8f;           // Chance de gerar o lixo
     private PlayerHealth playerHealth;
+    
+    // Adicione a referência ao script de controle de vitória
+    private VictoryEnemySpawn victoryEnemySpawn;
 
     private void Start()
     {
         animator = GetComponent<Animator>();
         playerHealth = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerHealth>();
+        victoryEnemySpawn = GameObject.FindObjectOfType<VictoryEnemySpawn>(); // Encontra o VictoryEnemySpawn na cena
     }
 
     public void TakeDamage(int damage)
@@ -44,6 +48,12 @@ public class EnemyHealth : MonoBehaviour
         Debug.Log("Inimigo derrotado!");
         animator.SetTrigger("isDead");
 
+        // Notifica o VictoryEnemySpawn que um inimigo morreu
+        if (victoryEnemySpawn != null)
+        {
+            victoryEnemySpawn.EnemyDefeated(); // Chama o método que conta a morte
+        }
+
         if (Random.value <= dropChance)
         {
             Debug.Log("Item de drop será instanciado.");
@@ -70,7 +80,6 @@ public class EnemyHealth : MonoBehaviour
 
         Destroy(gameObject);
     }
-
 
     private void OnCollisionStay2D(Collision2D collision)
     {

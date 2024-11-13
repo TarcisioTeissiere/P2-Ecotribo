@@ -1,4 +1,3 @@
-// PlayerInventory.cs
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -25,6 +24,11 @@ public class PlayerInventory : MonoBehaviour
     public bool IsInventoryFull()
     {
         return currentItemCount >= maxItems;
+    }
+
+    public bool IsInventoryEmpty()
+    {
+        return currentItemCount == 0; // Retorna true se não houver itens no inventário
     }
 
     private void Update()

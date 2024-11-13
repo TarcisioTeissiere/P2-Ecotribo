@@ -65,6 +65,8 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Enemy\EnemyAttack.cs" />
     <Compile Include="Assets\Scripts\PowerUp\PowerSpawn.cs" />
+    <Compile Include="Assets\Scripts\PowerUp\RandomSpawn.cs" />
+    <Compile Include="Assets\Scripts\Enemy\VictoryEnemySpawn.cs" />
     <Compile Include="Assets\Scripts\Player\ScoreManager.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerHealth.cs" />
     <Compile Include="Assets\Scripts\Enemy\EnemyMovement.cs" />

@@ -19,7 +19,7 @@ public class ScoreManager : MonoBehaviour
 
         if (score < 0)
         {
-            SceneManager.LoadScene("Lose"); // Carrega a cena de derrota
+            SceneManager.LoadScene("Menu"); // Carrega a cena de derrota
         }
     }
 
