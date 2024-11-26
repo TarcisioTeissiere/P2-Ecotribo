@@ -23,4 +23,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Second.unity
     guid: 3447716f4c06da647aa337225d855f5e
+  - enabled: 0
+    path: Assets/Scenes/Transition.unity
+    guid: 618d643dafe54154799345c05748a730
+  - enabled: 1
+    path: Assets/Scenes/Run.unity
+    guid: 4575454b3be27d24d8a26981b3e944c7
   m_configObjects: {}

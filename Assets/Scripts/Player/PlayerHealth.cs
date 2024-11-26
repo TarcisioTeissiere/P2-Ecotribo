@@ -1,43 +1,50 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-using UnityEngine.SceneManagement;
 
 public class PlayerHealth : MonoBehaviour
 {
-    public int maxHealth = 3;             // Vida máxima do jogador
-    private int currentHealth;            // Vida atual do jogador
-    private Animator animator;            // Referência ao Animator
-    private PlayerAttack playerAttack;    // Referência ao script de ataque do jogador
-
-    public Image[] hearts;                // Array para armazenar as imagens de coração
+    public int maxHealth = 3; 
+    private int currentHealth; 
+    private Animator animator;
+    public Image[] hearts;
+    public bool isDead = false; // Estado de morte do jogador
+    private PlayerAudioManager audioManager;
 
     private void Start()
     {
-        currentHealth = maxHealth;
+        currentHealth = maxHealth; // Inicia com a vida máxima
         animator = GetComponent<Animator>();
-        playerAttack = GetComponent<PlayerAttack>();
-        UpdateHearts();
+
+        audioManager = GetComponent<PlayerAudioManager>();
+        if (audioManager == null)
+        {
+            Debug.LogWarning("PlayerAudioManager não encontrado no Player.");
+        }
+
+        UpdateHearts(); // Atualiza as vidas na interface
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Enemy"))
+        if (collision.gameObject.CompareTag("Enemy") && !isDead)
         {
-            if (!animator.GetCurrentAnimatorStateInfo(0).IsName("playerAttack"))
-            {
-                TakeDamage(1); // Aplica 1 de dano ao jogador
-            }
+            TakeDamage(1);
         }
     }
 
     public void TakeDamage(int damage)
     {
+        if (isDead) return; // Não aplica dano se o jogador já estiver morto
+
         currentHealth -= damage;
         Debug.Log("Jogador recebeu dano. Vida atual: " + currentHealth);
-
+        if (audioManager != null)
+        {
+            audioManager.PlayHurtSound();
+        }
         animator.SetTrigger("playerHit");
-        UpdateHearts();
+        UpdateHearts(); // Atualiza interface
 
         if (currentHealth <= 0)
         {
@@ -47,6 +54,7 @@ public class PlayerHealth : MonoBehaviour
 
     private void UpdateHearts()
     {
+        // Atualiza as imagens das vidas na interface
         for (int i = 0; i < hearts.Length; i++)
         {
             hearts[i].enabled = (i < currentHealth);
@@ -55,14 +63,46 @@ public class PlayerHealth : MonoBehaviour
 
     private IEnumerator Die()
     {
+        if (isDead) yield break; // Impede múltiplas chamadas
+        isDead = true;
+
         Debug.Log("Jogador morreu!");
+
+        if (audioManager != null)
+        {
+            audioManager.PlayDeathSound();
+        }
+
+        DisablePlayerControls();
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.velocity = Vector2.zero;
+            rb.constraints = RigidbodyConstraints2D.FreezeAll;
+        }
+
+        // Desativa o colisor para evitar interações adicionais
+        GetComponent<Collider2D>().enabled = false;
+
         animator.SetTrigger("playerDeath");
         float deathAnimationTime = animator.GetCurrentAnimatorStateInfo(0).length;
-        float extraTime = 0.5f; // Tempo extra que você deseja adicionar (em segundos)
+        yield return new WaitForSeconds(deathAnimationTime+1);
+        Fade.Instance.TransitionToScene("Menu");
+    }
 
-        // Espera o tempo da animação de morte + o tempo extra
-        yield return new WaitForSeconds(deathAnimationTime + extraTime);
+    private void DisablePlayerControls()
+    {
+        // Desativa os controles do jogador (movimento e ataque)
+        PlayerMovement playerMovement = GetComponent<PlayerMovement>();
+        if (playerMovement != null)
+        {
+            playerMovement.enabled = false;
+        }
 
-        SceneManager.LoadScene("Menu");
+        PlayerAttack playerAttack = GetComponent<PlayerAttack>();
+        if (playerAttack != null)
+        {
+            playerAttack.enabled = false;
+        }
     }
 }

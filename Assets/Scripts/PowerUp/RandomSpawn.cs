@@ -6,7 +6,6 @@ public class RandomSpawn : MonoBehaviour
     public GameObject powerUpPrefab;
     public float spawnInterval = 20f;
 
-    // Limites para a área de spawn
     public float minX = -10f;
     public float maxX = 10f;
     public float minY = -10f;
@@ -27,8 +26,6 @@ public class RandomSpawn : MonoBehaviour
                 Random.Range(minY, maxY),
                 0f // Mantém a posição no plano XY
             );
-
-            // Instancia o PowerUp na posição aleatória
             Instantiate(powerUpPrefab, randomPosition, Quaternion.identity);
             yield return new WaitForSeconds(spawnInterval);
         }

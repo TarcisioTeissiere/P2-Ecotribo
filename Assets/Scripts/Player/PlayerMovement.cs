@@ -10,7 +10,7 @@ public class PlayerMovement : MonoBehaviour
     private float originalSpeed;
     private PlayerAnimation playerAnimation;
     private SpriteRenderer spriteRenderer;
-    private Coroutine activeSpeedBoost; // Armazena a corrotina ativa do SpeedBoost
+    private Coroutine activeSpeedBoost; 
 
     private void Start()
     {
@@ -41,16 +41,12 @@ public class PlayerMovement : MonoBehaviour
 
         Vector2 moveDirection = new Vector2(moveX, moveY).normalized;
         transform.position += (Vector3)moveDirection * moveSpeed * Time.deltaTime;
-
         Vector3 clampedPosition = transform.position;
         clampedPosition.x = Mathf.Clamp(clampedPosition.x, -screenBounds.x + spriteWidth / 2, screenBounds.x - spriteWidth / 2);
         clampedPosition.y = Mathf.Clamp(clampedPosition.y, -screenBounds.y + spriteHeight / 2, screenBounds.y - spriteHeight / 2);
         transform.position = clampedPosition;
-
-        // Atualiza a animação de movimento
         playerAnimation.SetMovementAnimation(moveDirection);
 
-        // Aplica o flip horizontal ao sprite se movendo para a esquerda ou direita
         if (moveX != 0)
         {
             spriteRenderer.flipX = moveX < 0; // Flip no eixo X se movendo para a esquerda
@@ -68,8 +64,8 @@ public class PlayerMovement : MonoBehaviour
     {
         if (activeSpeedBoost != null)
         {
-            StopCoroutine(activeSpeedBoost); // Para o SpeedBoost anterior, se ativo
-            moveSpeed = originalSpeed; // Garante que a velocidade retorne ao valor original
+            StopCoroutine(activeSpeedBoost); 
+            moveSpeed = originalSpeed; 
         }
         
         activeSpeedBoost = StartCoroutine(SpeedBoost(duration, boostAmount));

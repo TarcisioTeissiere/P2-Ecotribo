@@ -1,19 +1,26 @@
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PlayerInventory : MonoBehaviour
 {
-    private TrashTypeObject currentTrash = null; // Tipo de lixo atualmente carregado
-    public int maxItems = 3; // Limite de itens no inventário
-    private int currentItemCount = 0;
+    public int maxItems = 3; 
+    private List<TrashTypeObject> inventory = new List<TrashTypeObject>(); // Lista de itens no inventário
+    public Image[] inventorySlots;
+
+    public float discardRange = 1f;
 
     public void PickUpTrash(TrashTypeObject trashType)
     {
-        if (currentItemCount < maxItems)
+        if (inventory.Count < maxItems)
         {
-            currentTrash = trashType;
-            currentItemCount++;
-            Debug.Log("Lixo coletado: " + trashType.trashName + ". Itens no inventário: " + currentItemCount);
+            inventory.Add(trashType); // Adiciona o item ao inventário
+
+            // Atualizar o slot correspondente com o sprite do item
+            inventorySlots[inventory.Count - 1].sprite = trashType.trashSprite;
+            inventorySlots[inventory.Count - 1].enabled = true;
+
+            Debug.Log("Lixo coletado: " + trashType.trashName + ". Itens no inventário: " + inventory.Count);
         }
         else
         {
@@ -23,30 +30,43 @@ public class PlayerInventory : MonoBehaviour
 
     public bool IsInventoryFull()
     {
-        return currentItemCount >= maxItems;
+        return inventory.Count >= maxItems;
     }
 
     public bool IsInventoryEmpty()
     {
-        return currentItemCount == 0; // Retorna true se não houver itens no inventário
+        return inventory.Count == 0;
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.R) && currentTrash != null)
+        // Simulação de descarte de item ao pressionar "R"
+        if (Input.GetKeyDown(KeyCode.R) && !IsInventoryEmpty())
         {
+            TrashTypeObject trashToDiscard = inventory[0];
             TrashBin closestBin = FindClosestTrashBin();
-            if (closestBin != null && closestBin.IsCorrectBin(currentTrash))
+
+            if (closestBin != null && Vector3.Distance(transform.position, closestBin.transform.position) <= discardRange)
             {
-                Debug.Log("Lixo descartado corretamente!");
+                if (closestBin.IsCorrectBin(trashToDiscard))
+                {
+                    Debug.Log("Lixo descartado corretamente!");
+                }
+                else
+                {
+                    Debug.Log("Lixo descartado incorretamente!");
+                }
+
+                // Remover o item do inventário
+                inventory.RemoveAt(0);
+
+                // Atualizar os slots do inventário visualmente
+                UpdateInventoryUI();
             }
             else
             {
-                Debug.Log("Lixo descartado incorretamente!");
+                Debug.Log("Você precisa estar mais próximo de uma lixeira para descartar o lixo!");
             }
-
-            currentTrash = null;
-            currentItemCount--;
         }
     }
 
@@ -67,5 +87,22 @@ public class PlayerInventory : MonoBehaviour
         }
 
         return closestBin;
+    }
+
+    private void UpdateInventoryUI()
+    {
+        // Limpa todas as imagens
+        foreach (Image slot in inventorySlots)
+        {
+            slot.sprite = null;
+            slot.enabled = false;
+        }
+
+        // Atualiza os slots com os itens restantes no inventário
+        for (int i = 0; i < inventory.Count; i++)
+        {
+            inventorySlots[i].sprite = inventory[i].trashSprite;
+            inventorySlots[i].enabled = true;
+        }
     }
 }

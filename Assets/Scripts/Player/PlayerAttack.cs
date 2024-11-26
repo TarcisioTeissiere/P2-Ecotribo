@@ -2,20 +2,36 @@ using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
-    public float attackRange = 1f; // Distância do ataque
-    public LayerMask enemyLayer;   // Camada dos inimigos
-
+    public PolygonCollider2D swordCollider;
     private Animator animator;
-    private bool isAttacking = false;
+    private PlayerAudioManager audioManager;
+
+    public bool isAttacking = false;
 
     private void Awake()
     {
         animator = GetComponent<Animator>();
+
+        if (swordCollider == null)
+        {
+            swordCollider = GetComponentInChildren<PolygonCollider2D>(); // Localiza o Collider da espada, se não atribuído
+        }
+        audioManager = GetComponent<PlayerAudioManager>();
+        if (audioManager == null)
+        {
+            Debug.LogWarning("PlayerAudioManager não encontrado no Player.");
+        }
+
+        // Garante que o Collider da espada esteja desativado inicialmente
+        if (swordCollider != null)
+        {
+            swordCollider.enabled = false;
+        }
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && !isAttacking)
         {
             Attack();
         }
@@ -23,31 +39,33 @@ public class PlayerAttack : MonoBehaviour
 
     private void Attack()
     {
-        // Inicia a animação de ataque
+        isAttacking = true;
+
+        // Ativa o Collider da espada
+        if (swordCollider != null)
+        {
+            swordCollider.enabled = true;
+        }
         animator.SetTrigger("playerAttack");
 
-        // Detecta inimigos dentro do alcance de ataque e aplica dano
-        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(transform.position, attackRange, enemyLayer);
-
-        foreach (Collider2D enemy in hitEnemies)
+        if (audioManager != null)
         {
-            // Aplica dano ao inimigo se a animação de ataque estiver acontecendo
-            if (animator.GetCurrentAnimatorStateInfo(0).IsName("playerAttack"))
-            {
-                enemy.GetComponent<EnemyHealth>()?.TakeDamage(1);
-            }
+            audioManager.PlayAttackSound();
         }
 
         // Reinicia o estado de ataque após a animação
-        Invoke("ResetAttack", 0.5f); // Ajuste conforme a duração da animação
-    }
-    public bool IsAttacking()
-    {
-        return isAttacking;
+        float attackDuration = animator.GetCurrentAnimatorStateInfo(0).length;
+        Invoke("ResetAttack", attackDuration); // Ajuste conforme a duração da animação
     }
 
     private void ResetAttack()
     {
         isAttacking = false;
+
+        // Desativa o Collider da espada
+        if (swordCollider != null)
+        {
+            swordCollider.enabled = false;
+        }
     }
 }

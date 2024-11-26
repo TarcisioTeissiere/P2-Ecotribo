@@ -7,7 +7,7 @@ public class Play : MonoBehaviour
 {
     public void LoadScene(string scene)
     {
-        SceneManager.LoadScene(scene);
+        Fade.Instance.TransitionToScene(scene);
     }
 
     public void Quit()

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class TrashItem : MonoBehaviour
 {
-    public TrashTypeObject trashType; // Tipo de lixo usando o ScriptableObject
+    public TrashTypeObject trashType; // O tipo de lixo configurado no Inspector
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -11,8 +11,8 @@ public class TrashItem : MonoBehaviour
             PlayerInventory playerInventory = collision.collider.GetComponent<PlayerInventory>();
             if (playerInventory != null)
             {
-                playerInventory.PickUpTrash(trashType); // Passa o ScriptableObject como tipo de lixo
-                Destroy(gameObject); // Remove o item de lixo da cena
+                playerInventory.PickUpTrash(trashType);
+                Destroy(gameObject);
             }
         }
     }

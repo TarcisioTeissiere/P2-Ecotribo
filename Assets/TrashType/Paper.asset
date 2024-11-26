@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   trashName: Paper
   icon: {fileID: 21300000, guid: 2cae249a7a55968448571dbcc11f8f81, type: 3}
+  trashSprite: {fileID: 21300000, guid: 2cae249a7a55968448571dbcc11f8f81, type: 3}

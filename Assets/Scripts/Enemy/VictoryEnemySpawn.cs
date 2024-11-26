@@ -3,9 +3,9 @@ using UnityEngine.SceneManagement;
 
 public class VictoryEnemySpawn : MonoBehaviour
 {
-    public int requiredKills = 10; // Número de inimigos abatidos para vencer
-    private int killCount = 0; // Contador de inimigos abatidos
-    private ScoreManager scoreManager; // Referência ao script de pontuação
+    public int requiredKills = 2; 
+    private int killCount = 0; 
+    private ScoreManager scoreManager; 
 
     private void Start()
     {
@@ -34,6 +34,6 @@ public class VictoryEnemySpawn : MonoBehaviour
     private void LoadVictoryScene()
     {
         Debug.Log("Carregando tela de vitória...");
-        SceneManager.LoadScene("Victory"); // Nome da cena de vitória
+        Fade.Instance.TransitionToScene("Victory");
     }
 }

@@ -16,9 +16,9 @@ public class PlayerAnimation : MonoBehaviour
         animator.SetBool("isWalking", isWalking); // Atualiza a animação de movimento
     }
 
-    public void Attack() // Novo método para ataque
+    public void Attack() 
     {
-        animator.SetTrigger("playerAttack"); // Chama a animação de ataque
+        animator.SetTrigger("playerAttack");
     }
 
     public bool IsAttacking() // Método para verificar se o jogador está atacando

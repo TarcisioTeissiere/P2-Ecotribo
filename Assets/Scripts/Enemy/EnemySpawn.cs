@@ -5,16 +5,16 @@ public class EnemySpawn : MonoBehaviour
 {
     public GameObject enemyPrefab;
     public Transform spawnPoint;
-    public float spawnInterval = 2f;
+    public float spawnInterval = 5f;
     private float spawnTimer;
-
     private PlayerInventory playerInventory;
     private int enemyCount = 0;
-    private int maxEnemies = 10;
-
+    private int maxEnemies = 5;
+    private ScoreManager pscore; 
     private void Start()
     {
-        playerInventory = FindObjectOfType<PlayerInventory>();
+        playerInventory = FindObjectOfType<PlayerInventory>(); 
+        pscore = FindObjectOfType<ScoreManager>();  
         spawnTimer = spawnInterval;
     }
 
@@ -37,13 +37,29 @@ public class EnemySpawn : MonoBehaviour
         // Verifica se o inventário está vazio e o número de inimigos atingiu o máximo
         if (playerInventory != null && playerInventory.IsInventoryEmpty() && enemyCount >= maxEnemies)
         {
-            LoadNextScene(); // Carrega a nova cena
+            string currentScene = SceneManager.GetActiveScene().name;
+            if (currentScene == "First" && pscore.score >= 400)
+            {
+                LoadNextScene();  
+                enemyCount = 0;   
+            }
+
+            else if (currentScene == "Second" && pscore.score >= 600)
+            {
+                LoadVictoryScene();
+            }
         }
     }
 
     private void LoadNextScene()
     {
         Debug.Log("Carregando nova cena...");
-        SceneManager.LoadScene("Second"); // Substitua pelo nome da cena desejada
+        Fade.Instance.TransitionToScene("Second");
+    }
+
+    private void LoadVictoryScene()
+    {
+        Debug.Log("Condições de vitória atendidas! Carregando tela de vitória...");
+        Fade.Instance.TransitionToScene("Victory");
     }
 }

@@ -1,103 +1,104 @@
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
 
 public class EnemyHealth : MonoBehaviour
 {
-    public int currentHealth = 1;             // Vida inicial do inimigo
+    public int currentHealth = 1; // Vida inicial do Slime
+    public GameObject[] trashItemPrefabs; // Prefabs de lixo gerado
+    public float dropChance = 0.8f; // Chance de dropar item de lixo
+    private bool isDead = false; // Flag para evitar múltiplos eventos de morte
+    private bool hasDamagedPlayer = false; // Flag para evitar dano duplicado
     private Animator animator;
-    public GameObject[] trashItemPrefabs;      // Prefabs para o lixo que o inimigo deixa
-    private float dropChance = 0.8f;           // Chance de gerar o lixo
-    private PlayerHealth playerHealth;
-    
-    // Adicione a referência ao script de controle de vitória
-    private VictoryEnemySpawn victoryEnemySpawn;
+    private Collider2D enemyCollider;
+    private EnemyAudioManager audioManager;
 
     private void Start()
     {
         animator = GetComponent<Animator>();
-        playerHealth = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerHealth>();
-        victoryEnemySpawn = GameObject.FindObjectOfType<VictoryEnemySpawn>(); // Encontra o VictoryEnemySpawn na cena
+        enemyCollider = GetComponent<Collider2D>();
+        audioManager = GetComponent<EnemyAudioManager>();
+
+        if (audioManager == null)
+        {
+            Debug.LogWarning("EnemyAudioManager não encontrado no Slime.");
+        }
     }
 
-    public void TakeDamage(int damage)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (currentHealth > 0)
+        if (isDead || hasDamagedPlayer) return; // Previne ações após a morte ou múltiplos danos
+
+        if (collision.collider.CompareTag("Player"))
         {
-            currentHealth -= damage;
-            Debug.Log("Inimigo tomou dano. Vida atual: " + currentHealth);
+            PlayerHealth playerHealth = collision.collider.GetComponent<PlayerHealth>();
 
-            StartCoroutine(PlayHitAnimation());
-
-            if (currentHealth <= 0)
+            if (playerHealth != null)
             {
-                StartCoroutine(Die());
+                playerHealth.TakeDamage(1);
+                hasDamagedPlayer = true; 
+                Debug.Log("Slime causou dano ao jogador!");
+
+                // Inicia o processo de dano e morte
+                StartCoroutine(HandleDamageAndDeath());
             }
         }
     }
 
-    private IEnumerator PlayHitAnimation()
+    private IEnumerator HandleDamageAndDeath()
     {
-        animator.SetTrigger("slimeHit");
-        float hitAnimationTime = animator.GetCurrentAnimatorStateInfo(0).length;
-        float extraHitTime = 0.3f; // Tempo extra em segundos para a animação de hit
-        yield return new WaitForSeconds(hitAnimationTime + extraHitTime);
-    }
+        if (isDead) yield break; // Garante que o processo não será duplicado
+        isDead = true;
 
-    private IEnumerator Die()
-    {
-        Debug.Log("Inimigo derrotado!");
-        animator.SetTrigger("isDead");
-
-        // Notifica o VictoryEnemySpawn que um inimigo morreu
-        if (victoryEnemySpawn != null)
+        DisableEnemyCollisions();
+        if (animator != null)
         {
-            victoryEnemySpawn.EnemyDefeated(); // Chama o método que conta a morte
+            animator.SetTrigger("slimeHit");
+            yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
         }
 
-        if (Random.value <= dropChance)
+        // Executa a animação de morte
+        if (animator != null)
         {
-            Debug.Log("Item de drop será instanciado.");
+            animator.SetTrigger("isDead");
+            if (audioManager != null) audioManager.PlayDeathSound();
+            yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
+        }
+
+        // Dropar item de lixo
+        if (Random.value <= dropChance && trashItemPrefabs.Length > 0)
+        {
             int randomIndex = Random.Range(0, trashItemPrefabs.Length);
-            GameObject item = Instantiate(trashItemPrefabs[randomIndex], transform.position, Quaternion.identity);
-
-            if (item != null)
-            {
-                Debug.Log("Item instanciado com sucesso: " + item.name);
-            }
-            else
-            {
-                Debug.LogWarning("Falha ao instanciar o item de drop!");
-            }
+            Instantiate(trashItemPrefabs[randomIndex], transform.position, Quaternion.identity);
         }
-        else
-        {
-            Debug.Log("Item de drop não foi instanciado desta vez.");
-        }
-
-        float deathAnimationTime = animator.GetCurrentAnimatorStateInfo(0).length;
-        float extraDeathTime = 0.5f;
-        yield return new WaitForSeconds(deathAnimationTime + extraDeathTime);
 
         Destroy(gameObject);
     }
 
-    private void OnCollisionStay2D(Collision2D collision)
+    private void DisableEnemyCollisions()
     {
-        if (collision.collider.CompareTag("Player"))
-        {
-            Animator playerAnimator = collision.collider.GetComponent<Animator>();
-            bool isPlayerAttacking = playerAnimator != null && playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("playerAttack");
+        // Desativa o colisor para evitar múltiplas interações
+        if (enemyCollider != null) enemyCollider.enabled = false;
+    }
 
-            if (isPlayerAttacking && currentHealth > 0)
+    public void TakeDamage(int damage)
+    {
+        if (isDead) return;
+
+        currentHealth -= damage;
+        Debug.Log("Slime tomou dano. Vida atual: " + currentHealth);
+
+        if (currentHealth <= 0)
+        {
+            StartCoroutine(HandleDamageAndDeath());
+        }
+        else
+        {
+            // Toca a animação de hit
+            if (animator != null)
             {
-                TakeDamage(1);
-            }
-            else
-            {
-                // Se o jogador não estiver atacando, o inimigo não toma dano
-                Debug.Log("Inimigo não tomou dano porque o jogador não estava atacando.");
+                animator.SetTrigger("slimeHit");
+                if (audioManager != null) audioManager.PlayDeathSound();
             }
         }
-
     }
 }

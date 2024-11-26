@@ -15,25 +15,22 @@ public class EnemyAnimation : MonoBehaviour
 
     private void Update()
     {
-        // Verifica se o inimigo está morto
         if (enemyHealth.currentHealth <= 0)
         {
             animator.SetBool("isDead", true);
-            return; // Se estiver morto, não deve mais fazer nada além de animação de morte
+            return; 
         }
-
-        // Verifica se o inimigo está andando
         bool isWalking = enemyMovement.IsMoving();
         animator.SetBool("isWalking", isWalking);
     }
 
-    // Função para ativar a animação de ataque
+    // Função para ativar a animação de ataque do Slime
     public void TriggerAttack()
     {
         animator.SetTrigger("isAttacking");
     }
 
-    // Função para ativar a animação de dano
+    // Função para ativar a animação de dano do Slime
     public void TakeHit()
     {
         animator.SetTrigger("slimeHit");

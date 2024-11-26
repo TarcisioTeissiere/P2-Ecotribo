@@ -4,12 +4,30 @@ using TMPro;
 
 public class ScoreManager : MonoBehaviour
 {
+    public static ScoreManager Instance;
     public int score = 0;
-    public TextMeshProUGUI scoreText; // Arraste o TextMeshProUGUI aqui pelo Inspector
+    public TextMeshProUGUI scoreText; 
 
-    private void Start()
+    private void Awake()
     {
-        UpdateScoreText(); // Atualiza o texto inicialmente
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject); 
+            SceneManager.sceneLoaded += OnSceneLoaded; 
+        }
+        else
+        {
+            Destroy(gameObject); // Remove instâncias duplicadas
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
     }
 
     public void AddScore(int amount)
@@ -19,17 +37,36 @@ public class ScoreManager : MonoBehaviour
 
         if (score < 0)
         {
-            SceneManager.LoadScene("Menu"); // Carrega a cena de derrota
+            SceneManager.LoadScene("Menu");
         }
     }
 
     private void UpdateScoreText()
     {
-        scoreText.text = "Pontuação: " + score; // Atualiza o texto na tela
+        if (scoreText != null)
+        {
+            scoreText.text = "Pontuação: " + score;
+        }
     }
 
     public int GetScore()
     {
         return score;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Verifica se a cena atual é uma das que precisam mostrar pontuação
+        if (scene.name == "First" || scene.name == "Second" || scene.name == "Victory")
+        {
+            // Tenta encontrar um objeto TextMeshProUGUI na nova cena
+            scoreText = FindObjectOfType<TextMeshProUGUI>();
+            UpdateScoreText();
+        }
+        else
+        {
+            scoreText = null;
+            score =  0; 
+        }
     }
 }
